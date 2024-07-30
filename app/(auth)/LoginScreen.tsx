@@ -26,7 +26,7 @@ export default function LoginScreen() {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
   const router = useRouter();
-  const API_URL = "https://entrenat-gateway.ddns.net/api/v1/users";
+  const API_URL = "http://172.20.10.2:8082";
 
   useEffect(() => {
     if (loginAttempts >= 3) {
@@ -57,24 +57,24 @@ export default function LoginScreen() {
       const authController = new AuthController(API_URL);
       const data = await authController.login(email, password);
 
-      console.log("Datos recibidos de login:", data);
+      console.log("Inicio de sesión exitoso");
 
       if (data && data.data && data.data.token) {
-        console.log("Login successful", data);
+        console.log("Inicio de sesión exitoso");
         await AsyncStorage.setItem(
           "user",
-          JSON.stringify({ data: data.data, token: data.data.token })
+          JSON.stringify({ data: { id: data.data.id, token: data.data.token } })
         );
         router.push("/HomeScreen");
       } else {
         setLoginAttempts(loginAttempts + 1);
-        console.error("Login error: Invalid credentials", data);
+        console.error("Error en el inicio de sesión: Credenciales inválidas");
         Alert.alert("Error", "Credenciales incorrectas. Inténtalo de nuevo.");
       }
     } catch (error) {
       setLoginAttempts(loginAttempts + 1);
-      console.error("Login error", error);
-      Alert.alert("Error", "Ocurrió un error durante el inicio de sesión.");
+      console.error("Error en el inicio de sesión", error);
+      Alert.alert("Error", "Credenciales incorrectas. Inténtalo de nuevo.");
     }
   };
 
@@ -125,7 +125,7 @@ export default function LoginScreen() {
               <Text style={{ color: "white" }}>
                 No tienes una cuenta?{" "}
                 <Link style={styles.textRegister} href="/RegisterScreen">
-                  Registrate!
+                  Regístrate!
                 </Link>
               </Text>
             </View>

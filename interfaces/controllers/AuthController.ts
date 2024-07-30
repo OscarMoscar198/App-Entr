@@ -17,12 +17,10 @@ class AuthController {
   }
 
   async login(email: string, password: string) {
-    console.log("AuthController: login called");
     return this.loginUseCase.execute(email, password);
   }
 
   async register(user: User) {
-    console.log("AuthController: register called");
     return this.registerUseCase.execute(user);
   }
 }

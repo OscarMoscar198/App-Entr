@@ -13,7 +13,6 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 
-// Definimos un tipo para el usuario
 interface User {
   UserID: number;
   Nombre: string;
@@ -24,7 +23,6 @@ interface User {
   Gender?: string;
   nickname?: string;
   description?: string;
-  gym?: string;
   token?: string; // Añadido para incluir el token
 }
 
@@ -38,7 +36,6 @@ export default function EditProfileScreen() {
   const [gender, setGender] = useState("");
   const [nickname, setNickname] = useState("");
   const [description, setDescription] = useState("");
-  const [gym, setGym] = useState("");
   const [image, setImage] = useState<string | undefined>(undefined);
   const router = useRouter();
 
@@ -50,24 +47,18 @@ export default function EditProfileScreen() {
           const parsedUser = JSON.parse(userData);
           const token = parsedUser.data.token;
           const userId = parsedUser.data.id;
-          console.log("Token:", token);
 
-          const response = await fetch(
-            `https://entrenatusers.ddns.net/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          console.log("API Response status:", response.status);
+          const response = await fetch(`http://172.20.10.2:8082/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Incluye el token de autorización en el formato correcto
+            },
+          });
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-
+          console.log("token soy update", token );
           const data = await response.json();
-          console.log("User data from API:", data);
 
           const mappedUser: User = {
             UserID: data.data.UserID,
@@ -78,19 +69,17 @@ export default function EditProfileScreen() {
             Gender: data.data.Gender,
             nickname: data.data.nickname,
             description: data.data.description,
-            gym: data.data.gym,
             img: data.data.img,
-            token,
+            token, // Añadido el token
           };
 
-          setUser(mappedUser);
+          setUser(mappedUser); // Establecer el usuario mapeado
           setName(mappedUser.Nombre);
           setWeight(mappedUser.Peso ? mappedUser.Peso.toString() : "");
           setHeight(mappedUser.Altura ? mappedUser.Altura.toString() : "");
           setGender(mappedUser.Gender || "");
           setNickname(mappedUser.nickname || "");
           setDescription(mappedUser.description || "");
-          setGym(mappedUser.gym || "");
           setImage(mappedUser.img || undefined);
         }
       } catch (error) {
@@ -133,6 +122,7 @@ export default function EditProfileScreen() {
               {
                 method: "PUT",
                 headers: {
+                  Accept: "application/json",
                   "Content-Type": "multipart/form-data",
                 },
                 body: formData,
@@ -142,6 +132,7 @@ export default function EditProfileScreen() {
             response = await fetch("http://34.201.87.239:5000/upload", {
               method: "POST",
               headers: {
+                Accept: "application/json",
                 "Content-Type": "multipart/form-data",
               },
               body: formData,
@@ -151,7 +142,6 @@ export default function EditProfileScreen() {
           const textResponse = await response.text();
           try {
             const data = JSON.parse(textResponse);
-            console.log("Upload response data:", data);
 
             if (data.explicit === "false") {
               setImage(result.assets[0].uri);
@@ -171,7 +161,6 @@ export default function EditProfileScreen() {
             );
           }
         } catch (error) {
-          console.error("Error al subir la imagen:", error);
           Alert.alert(
             "Error",
             "Error al subir la imagen, la imagen tiene contenido inapropiado."
@@ -196,11 +185,9 @@ export default function EditProfileScreen() {
       }
 
       const data = await response.json();
-      console.log("Check inappropriate words response:", data);
-      return data.contains_profanity;
+      return data.contains_profanity; // Devuelve true si el texto contiene palabras inapropiadas
     } catch (error) {
-      console.error("Error checking text:", error);
-      return false;
+      return false; // En caso de error, asumir que el texto es válido para no bloquear el flujo
     }
   };
 
@@ -211,7 +198,6 @@ export default function EditProfileScreen() {
         checkInappropriateWords(gender),
         checkInappropriateWords(description),
         checkInappropriateWords(nickname),
-        checkInappropriateWords(gym),
       ]);
 
       const hasInappropriateWords = results.some((result) => result);
@@ -234,23 +220,7 @@ export default function EditProfileScreen() {
         const parsedUser = JSON.parse(userData);
         const token = parsedUser.data.token;
 
-        console.log("Saving user with ID:", user.UserID);
-        console.log(
-          "Request body:",
-          JSON.stringify({
-            id: user.UserID,
-            Nombre: name,
-            Altura: parseFloat(height),
-            Peso: parseFloat(weight),
-            Gender: gender,
-            nickname,
-            description,
-            img: image,
-            gym,
-          })
-        );
-
-        const response = await fetch(`https://entrenatusers.ddns.net/update`, {
+        const response = await fetch(`http://172.20.10.2:8082/update`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -264,15 +234,11 @@ export default function EditProfileScreen() {
             Gender: gender,
             nickname,
             description,
-            img: image,
-            gym,
+            img: image, // Usar la nueva imagen
           }),
         });
 
-        console.log("Update API Response status:", response.status);
-
         const responseData = await response.text();
-        console.log("Update API Response body:", responseData);
 
         if (response.ok) {
           const updatedUser: User = {
@@ -283,18 +249,16 @@ export default function EditProfileScreen() {
             Gender: gender,
             nickname,
             description,
-            gym,
-            img: image,
-            token,
+            img: image, // Actualizar con la nueva imagen
+            token, // Mantén el token actual del usuario
           };
           await AsyncStorage.setItem(
             "user",
             JSON.stringify({ data: updatedUser })
           );
           setUser(updatedUser);
-          router.push("/HomeScreen");
+          router.push("/LoginScreen");
         } else {
-          console.log("Error response:", responseData);
           alert("Error al guardar los cambios: " + responseData);
         }
       }
@@ -346,8 +310,6 @@ export default function EditProfileScreen() {
           value={description}
           onChangeText={setDescription}
         />
-        <Text style={styles.label}>Gimnasio</Text>
-        <TextInput style={styles.input} value={gym} onChangeText={setGym} />
 
         <Button mode="contained" onPress={handleSave} style={styles.button}>
           Guardar Cambios

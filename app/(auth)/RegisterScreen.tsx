@@ -70,7 +70,7 @@ export default function RegisterScreen() {
   const [height, setHeight] = useState("");
   const [sex, setSex] = useState("");
   const router = useRouter();
-  const API_URL = "https://entrenatusers.ddns.net";
+  const API_URL = "http://172.20.10.2:8082";
   const CHECK_TEXT_URL = "http://18.234.203.47:5000/check";
 
   const generateNickname = () => {
@@ -101,8 +101,7 @@ export default function RegisterScreen() {
       console.log("Check inappropriate words response:", data);
       return data.contains_profanity; // Devuelve true si el texto contiene palabras inapropiadas
     } catch (error) {
-      console.error("Error checking text:", error);
-      return null; // En caso de error, retornar null para manejar esto en la lógica de registro
+      return false; // En caso de error, asumir que el texto es válido para no bloquear el flujo
     }
   };
 
@@ -127,12 +126,7 @@ export default function RegisterScreen() {
         checkInappropriateWords(sex),
       ]);
 
-      const hasInappropriateWords = results.some((result) => result === true);
-
-      if (results.includes(null)) {
-        Alert.alert("Error", "Ocurrió un error al verificar el texto.");
-        return;
-      }
+      const hasInappropriateWords = results.some((result) => result);
 
       if (hasInappropriateWords) {
         Alert.alert(
@@ -142,7 +136,7 @@ export default function RegisterScreen() {
         return;
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", "Ocurrió un error al verificar el texto.");
       return;
     }
 

@@ -8,7 +8,6 @@ class LoginUseCase {
   }
 
   async execute(email: string, password: string) {
-    console.log("LoginUseCase: execute called with", { email, password });
     return this.userRepository.login(email, password);
   }
 }

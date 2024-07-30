@@ -36,24 +36,20 @@ export default function ProfileScreen() {
         if (userData) {
           const parsedUser = JSON.parse(userData);
           const token = parsedUser.data.token;
-          console.log("Token:", token);
-
           const response = await fetch(
-            `https://entrenatusers.ddns.net/${parsedUser.data.id}`,
+            `http://172.20.10.2:8082/${parsedUser.data.id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }
           );
-          console.log("API Response status:", response.status);
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-
+         
           const data = await response.json();
-          console.log("User data from API:", data);
 
           const mappedUser: User = {
             UserID: data.data.UserID,

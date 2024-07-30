@@ -22,7 +22,7 @@ export default function GymbroScreen() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const router = useRouter();
-  const API_URL = "https://entrenatusers.ddns.net";
+  const API_URL = "http://172.20.10.2:8082";
 
   const fetchUsers = async () => {
     try {

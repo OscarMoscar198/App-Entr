@@ -30,24 +30,18 @@ export default function UserDetailScreen() {
         if (userData) {
           const parsedUser = JSON.parse(userData);
           const token = parsedUser.token;
-          console.log("Token:", token); // Registro del token para verificar
 
-          const response = await fetch(
-            `https://entrenatusers.ddns.net/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`, // Incluye el token de autorización en el formato correcto
-              },
-            }
-          );
-          console.log("API Response status:", response.status);
+          const response = await fetch(`http://172.20.10.2:8082/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Incluye el token de autorización en el formato correcto
+            },
+          });
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
           const data = await response.json();
-          console.log("User data from API:", data);
 
           // Mapear los datos recibidos a la estructura esperada
           const mappedUser: User = {
