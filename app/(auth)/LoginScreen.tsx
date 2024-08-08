@@ -74,7 +74,10 @@ export default function LoginScreen() {
     } catch (error) {
       setLoginAttempts(loginAttempts + 1);
       console.error("Error en el inicio de sesión", error);
-      Alert.alert("Error", "Credenciales incorrectas. Inténtalo de nuevo.");
+      Alert.alert(
+        "Error",
+        "Ocurrió un problema al iniciar sesión. Por favor, inténtalo de nuevo más tarde."
+      );
     }
   };
 
@@ -175,3 +178,4 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
+

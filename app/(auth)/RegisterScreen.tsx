@@ -14,7 +14,7 @@ const theme = {
   roundness: 10,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#F04444", // color para el botón y otros componentes principales
+    primary: "#F04444",
   },
 };
 
@@ -61,6 +61,17 @@ const styles = StyleSheet.create({
   },
 });
 
+const cleanInput = (input: string) => {
+  return encodeURIComponent(
+    input
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Normalización para remover acentos
+      .replace(/['"]/g, "") // Remover comillas simples y dobles
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Remover scripts
+  );
+};
+
 export default function RegisterScreen() {
   const [name, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -106,7 +117,15 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    if (!validatePassword(password)) {
+    const cleanedName = cleanInput(name);
+    const cleanedEmail = cleanInput(email);
+    const cleanedPassword = cleanInput(password);
+    const cleanedConfirmPassword = cleanInput(confirmPassword);
+    const cleanedWeight = cleanInput(weight);
+    const cleanedHeight = cleanInput(height);
+    const cleanedSex = cleanInput(sex);
+
+    if (!validatePassword(cleanedPassword)) {
       Alert.alert(
         "Error",
         "La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un símbolo."
@@ -114,7 +133,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (cleanedPassword !== cleanedConfirmPassword) {
       Alert.alert("Error", "Las contraseñas no coinciden");
       return;
     }
@@ -122,8 +141,8 @@ export default function RegisterScreen() {
     try {
       // Verificar si hay palabras inapropiadas en los campos de nombre y sexo
       const results = await Promise.all([
-        checkInappropriateWords(name),
-        checkInappropriateWords(sex),
+        checkInappropriateWords(decodeURIComponent(cleanedName)),
+        checkInappropriateWords(decodeURIComponent(cleanedSex)),
       ]);
 
       const hasInappropriateWords = results.some((result) => result);
@@ -150,12 +169,12 @@ export default function RegisterScreen() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name,
-          email,
-          password,
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          sex,
+          name: decodeURIComponent(cleanedName),
+          email: decodeURIComponent(cleanedEmail),
+          password: decodeURIComponent(cleanedPassword),
+          height: parseFloat(decodeURIComponent(cleanedHeight)),
+          weight: parseFloat(decodeURIComponent(cleanedWeight)),
+          sex: decodeURIComponent(cleanedSex),
           nickname, // Incluye el nickname en los datos del registro
         }),
       });
@@ -176,8 +195,8 @@ export default function RegisterScreen() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email,
-            password,
+            email: decodeURIComponent(cleanedEmail),
+            password: decodeURIComponent(cleanedPassword),
           }),
         });
 
@@ -269,6 +288,7 @@ export default function RegisterScreen() {
             style={styles.input}
             placeholder="Email"
             textContentType="emailAddress"
+            keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
             autoComplete="off" // Desactiva el autocompletado

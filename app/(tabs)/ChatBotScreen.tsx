@@ -9,7 +9,8 @@ import {
 } from "react-native";
 
 // Define tu clave API directamente aquí
-
+const OPENAI_API_KEY =
+  "";
 
 const systemMessage = {
   role: "system",

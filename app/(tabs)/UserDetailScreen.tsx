@@ -4,14 +4,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Button } from "react-native-paper";
 
-// Definimos un tipo para el usuario
 interface User {
   UserID: number;
   Nombre: string;
-  Correo: string;
   img?: string;
-  Peso?: number;
-  Altura?: number;
   Gender?: string;
   nickname?: string;
   description?: string;
@@ -43,13 +39,9 @@ export default function UserDetailScreen() {
 
           const data = await response.json();
 
-          // Mapear los datos recibidos a la estructura esperada
           const mappedUser: User = {
             UserID: data.data.UserID,
             Nombre: data.data.Nombre,
-            Correo: data.data.Correo,
-            Peso: data.data.Peso,
-            Altura: data.data.Altura,
             Gender: data.data.Gender,
             nickname: data.data.nickname,
             description: data.data.description,
@@ -84,22 +76,9 @@ export default function UserDetailScreen() {
         />
         <View style={styles.userInfo}>
           <Text style={styles.name}>{user.Nombre}</Text>
-          <Text style={styles.email}>{user.Correo}</Text>
         </View>
       </View>
       <View style={styles.infoContainer}>
-        {user.Peso && (
-          <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Peso</Text>
-            <Text style={styles.infoValue}>{user.Peso} KG</Text>
-          </View>
-        )}
-        {user.Altura && (
-          <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Altura</Text>
-            <Text style={styles.infoValue}>{user.Altura} m</Text>
-          </View>
-        )}
         {user.Gender && (
           <View style={styles.infoBox}>
             <Text style={styles.infoLabel}>Género</Text>
@@ -163,10 +142,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 24,
     color: "#fff",
-  },
-  email: {
-    fontSize: 18,
-    color: "gray",
   },
   infoContainer: {
     backgroundColor: "#F04444",
